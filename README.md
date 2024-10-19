@@ -46,7 +46,7 @@ Other UART-related registers, such as **USART_BRR** (Baud Rate Register) and **U
 #define USART_CR1  (*((volatile uint32_t *)(USART2_BASE_ADDR + 0x0C)))   // Control Register 1
 #define USART_CR2  (*((volatile uint32_t *)(USART2_BASE_ADDR + 0x10)))   // Control Register 2
 #define USART_CR3  (*((volatile uint32_t *)(USART2_BASE_ADDR + 0x14)))   // Control Register 3
-
+```
 Here’s an updated version of the section that provides more clarity and detail on the pin configuration for PA2 and PA3:
 
 ### 2. Pin Configuration (PA2 and PA3)
@@ -161,37 +161,35 @@ Here's the updated section for your README.md that includes the details about ba
 The baud rate is an essential parameter for serial communication, determining how fast data is transmitted over a UART interface. In this implementation, the baud rate is set to **9600 bps** by configuring the **USART_BRR** (Baud Rate Register). 
 
 The specific value `0x683` is calculated using the following formula:
+### USART_DIV Formula:
 
-\[
-\text{USART\_DIV} = \frac{f_{CK}}{16 \times \text{baud rate}}
-\]
-
+The formula for calculating `USART_DIV` is:
+```
+USART_DIV = f_CK / (16 × baud rate)
+```
 Where:
-- \( f_{CK} \) is the clock frequency (in Hz). For this implementation, we assume a system clock of **16 MHz**.
-- **baud rate** is the desired communication speed (9600 bps in this case).
 
-Given these parameters:
+- `f_CK` is the clock frequency in Hz (in this case, 16 MHz).
+- Baud rate is the communication speed, for example, 9600 bps.
 
-\[
-\text{USART\_DIV} = \frac{16,000,000}{16 \times 9600} \approx 104.1667
-\]
+Given:
+```
+USART_DIV = 16,000,000 / (16 × 9600) ≈ 104.1667
+```
+The integer part of `USART_DIV` is used to determine the Mantissa (104), and the fractional part (0.1667) is used to calculate the Fraction.
 
-The integer part of **USART_DIV** is used to determine the **Mantissa** (104), and the fractional part (0.1667) is used to calculate the **Fraction**. 
+To set this up in the `USART_BRR` register:
 
-To set this up in the **USART_BRR** register:
-
-- The **Mantissa** is placed in the upper 12 bits.
-- The **Fraction** is calculated as follows:
-\[
-\text{Fraction} = \text{round}(0.1667 \times 16) \approx 2
-\]
+- The Mantissa is placed in the upper 12 bits.
+- The Fraction is calculated as follows:
+```  
+Fraction = round(0.1667 × 16) ≈ 2
+```
 
 So, the complete configuration for the **USART_BRR** value is:
-
-\[
-\text{USART\_BRR} = (\text{Mantissa} << 4) | \text{Fraction} = (104 << 4) | 2 = 0x683
-\]
-
+```
+USART_BRR = (Mantissa << 4) | Fraction = (104 << 4) | 2 = 0x683
+```
 ### Explanation of the Shifting Operation
 - **Mantissa << 4** shifts the **Mantissa** value of **104** to the left by **4 bits**, placing it in the higher part of the **USART_BRR** register, which corresponds to the 12 most significant bits.
 - The **Fraction** value of **2** is then added to the lower 4 bits of the register using a bitwise OR operation (`|`).
